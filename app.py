@@ -50,7 +50,7 @@ from pathlib import Path
 print(Path.cwd())
 print("/"+dir+"/*." +"csv")
 print(glob.glob("/"+dir+"/*." +"csv"))
-file_list = glob.glob("/"+dir+"/*." +"csv")
+file_list = glob.glob("/app/"+dir+"/*." +"csv")
 if show_output_on_notebook:
     print(file_list)
 
