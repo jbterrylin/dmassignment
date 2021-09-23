@@ -18,6 +18,7 @@ import glob
 import streamlit as st
 from traitlets.config import Config
 from itertools import compress
+from os import walk
 
 st.set_option('deprecation.showPyplotGlobalUse', False)
 pd.options.mode.chained_assignment = None
@@ -43,17 +44,15 @@ QuestionSB = st.sidebar.selectbox("Questions", ["Question 1(Missing Value)", "Qu
 # In[3]:
 
 
-file_list = glob.glob(dir+"/*." +"csv")
-from os import walk
-print(os.path.dirname(__file__)+"/"+dir)
-print(next(walk(os.path.dirname(__file__)+"/"+dir), (None, None, []))[2])
-
+file_list = next(walk(os.path.dirname(__file__)+"/"+dir), (None, None, []))[2]
 if show_output_on_notebook:
     print(file_list)
 
 df = {}
 for i, names in enumerate(file_list):
-    df[file_list[i].replace(dir+"\\", '').replace(".csv",'')] = pd.read_csv(file_list[i])
+    df[file_list[i]] = pd.read_csv(os.path.dirname(__file__)+"/"+dir+"/"+file_list[i])
+    print(os.path.dirname(__file__)+"/"+dir+"/"+file_list[i])
+    print(file_list[i])
 if show_output_on_notebook:
     print(df['deaths_state'].head())
 
