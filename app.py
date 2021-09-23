@@ -44,8 +44,10 @@ QuestionSB = st.sidebar.selectbox("Questions", ["Question 1(Missing Value)", "Qu
 
 
 # file_list = glob.glob(dir+"/*." +"csv")
-print(os.path.dirname(__file__) )
-file_list = glob.glob(dir+"/*." +"csv")
+print(os.path.dirname(__file__))
+print("/"+dir+"/*." +"csv")
+print(glob.glob("/"+dir+"/*." +"csv"))
+file_list = glob.glob("/"+dir+"/*." +"csv")
 if show_output_on_notebook:
     print(file_list)
 
