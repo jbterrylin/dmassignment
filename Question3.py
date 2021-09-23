@@ -23,11 +23,13 @@ st.set_option('deprecation.showPyplotGlobalUse', False)
 pd.options.mode.chained_assignment = None
 
 dir = 'Data Mining Assignment Dataset'
+# if u want to show graph in this note pls change to true (this wll make streamlit having error if convert with True)
+show_output_on_notebook = False
 
 print("Ready to use ! ")
 
 
-# In[81]:
+# In[2]:
 
 
 QuestionSB = st.sidebar.selectbox("Questions", ["Question 1(Missing Value)", "Question 1(EDA)", "Question 2", "Question 3", "Question 4"], key="QuestionSB")
@@ -41,17 +43,19 @@ QuestionSB = st.sidebar.selectbox("Questions", ["Question 1(Missing Value)", "Qu
 
 
 file_list = glob.glob(dir+"/*." +"csv")
-print(file_list)
+if show_output_on_notebook:
+    print(file_list)
 
 df = {}
 for i, names in enumerate(file_list):
     df[file_list[i].replace(dir+"\\", '').replace(".csv",'')] = pd.read_csv(file_list[i])
-
-print(df['deaths_state'].head())
+if show_output_on_notebook:
+    print(df['deaths_state'].head())
 
 # Get the array list for States in Malaysia
 state_list = list(np.unique(df['deaths_state']['state']))
-print(state_list)
+if show_output_on_notebook:
+    print(state_list)
 
 
 # # Question (i) Answers
@@ -69,7 +73,7 @@ print(state_list)
 # #### Unlike looking for outliers, which might require different detection methods depending on the nature of the data, it is always good to know all the locations of missing values in the datasets. 
 # #### In this part of the code, I will be looping through every row for each column in all of the datasets in this assignment. The information of data missing including the type of data, location and the number of missing values would be detected in this following codes. 
 
-# In[128]:
+# In[4]:
 
 
 for key, value in df.items():
@@ -86,10 +90,11 @@ if QuestionSB == "Question 1(Missing Value)":
         variable_dtypes_df.rename(columns={0: "dtypes"}, inplace=True)
         variable_dtypes_df["isna"] = value.isna().sum()
         st.write(variable_dtypes_df)
-        print(variable_dtypes_df)
+        if show_output_on_notebook:
+            print(variable_dtypes_df)
 
 
-# In[152]:
+# In[5]:
 
 
 def advanceGrouping(df,alignColumn,targetColumn):
@@ -101,11 +106,13 @@ def advanceGrouping(df,alignColumn,targetColumn):
         cases_states_df = cases_states_df.merge(cases_state_df, how='inner', on='date')
     return cases_states_df
 
-def createBoxPlot(df,show_count_table):
+def createBoxPlot(df,show_count_table, show_output_on_notebook):
     sns.set(rc={'figure.figsize':(11.7,8.27)})
     ax = sns.boxplot(data=df)
     if(df.shape[1] > 1):
         ax.set_xticklabels(ax.get_xticklabels(),rotation=-60, horizontalalignment='left')
+    if show_output_on_notebook:
+        plt.show(ax)
     st.pyplot()
 
     Q1 = df.quantile(.25)
@@ -115,9 +122,11 @@ def createBoxPlot(df,show_count_table):
     cases_outliers_df.rename(columns={0: "Count of outlier"}, inplace=True)
     if show_count_table:
         st.table(cases_outliers_df)
+    if show_output_on_notebook:
+        print(cases_outliers_df)
     return ((df < (Q1 - 1.5 * IQR)) | (df > (Q3 + 1.5 * IQR)))
 
-if QuestionSB == "Question 1(EDA)":
+if QuestionSB == "Question 1(EDA)" or show_output_on_notebook:
     st.title("Exploratory Data Analysis")
     state_listSB = st.selectbox("State", ["All State"]+state_list)
     
@@ -129,7 +138,7 @@ if QuestionSB == "Question 1(EDA)":
         st.table(cases_states_df[state].to_frame().describe())
         
         st.header(state + "'s boxplot")
-        mask = createBoxPlot(cases_states_df[state].to_frame(),False)
+        mask = createBoxPlot(cases_states_df[state].to_frame(),False, show_output_on_notebook)
         
         st.header(state + "'s outlier")
         outlier_df = pd.DataFrame(list(compress(cases_states_df[state], mask[state])))
@@ -138,9 +147,10 @@ if QuestionSB == "Question 1(EDA)":
     else:
         st.header("All state's cases_state EDA")
         st.write(cases_states_df.describe())
+        print(cases_states_df.describe())
         
         st.header("All state's boxplot")
-        createBoxPlot(cases_states_df[cases_states_df.columns.difference(['date'])],True)
+        createBoxPlot(cases_states_df[cases_states_df.columns.difference(['date'])],True, show_output_on_notebook)
 
 
 # # Question (ii) Answers
@@ -149,35 +159,38 @@ if QuestionSB == "Question 1(EDA)":
 
 # #### To search for the states that has strong correlation with Pahang and Johor, I will be using 'corr()' function from pandas.
 
-# In[86]:
+# In[6]:
 
 
 # Joining the states into a single dataframe 
-if QuestionSB == "Question 2":
+if QuestionSB == "Question 2"  or show_output_on_notebook:
     st.title("Correlation")
     st.header("Heat Map of case state")
     state_cases_df = advanceGrouping(df['cases_state'],'date','state')
     state_cases_correlation = state_cases_df.corr()
-    sns.heatmap(state_cases_correlation, vmax=.8, square=True, annot=True, fmt='.2f', annot_kws={'size': 5}, cmap=sns.color_palette("Blues"))
-    
+    ax = sns.heatmap(state_cases_correlation, vmax=.8, square=True, annot=True, fmt='.2f', annot_kws={'size': 5}, cmap=sns.color_palette("Blues"))
+    if show_output_on_notebook:
+        plt.show(ax)
     st.pyplot()
 
 
-# In[10]:
+# In[7]:
 
 
-if QuestionSB == "Question 2":
+if QuestionSB == "Question 2"  or show_output_on_notebook:
     pahang_correlation = state_cases_correlation.loc[state_cases_correlation.index == 'Pahang']
     johor_correlation = state_cases_correlation.loc[state_cases_correlation.index == 'Johor']
     
     st.header("Heat Map of case state (Johor)")
     ax = johor_correlation.plot.bar(rot=0, figsize = (15,8), title = 'Correlation with Johor')
-    plt.show()
+    if show_output_on_notebook:
+        plt.show()
     st.pyplot()
     
     st.header("Heat Map of case state (Pahang)")
     ax1 = pahang_correlation.plot.bar(rot=0, figsize = (15,8), title = 'Correlation with Pahang')
-    plt.show()
+    if show_output_on_notebook:
+        plt.show()
     st.pyplot()
 
 
@@ -190,7 +203,7 @@ if QuestionSB == "Question 2":
 # ### What are the strong features/indicators to daily cases for Pahang, Kedah, Johor and Selangor. Use at least 2 methods to justify your findings
 # 
 
-# In[125]:
+# In[8]:
 
 
 # This part of the code will show error if it is runned for the second time without re-runing the whole program 
@@ -204,10 +217,11 @@ q3_df_title.remove('clusters')
 q3_df_title.remove('population')
 q3_df_title.remove('cases_malaysia')
 q3_df_title.remove('deaths_malaysia')
-print(q3_df_title)
+if show_output_on_notebook:
+    print(q3_df_title)
 
 
-# In[12]:
+# In[9]:
 
 
 q3_combined_df = {}
@@ -217,7 +231,8 @@ for q3_state in q3_state_list:
     i = 0
     for q3_title in q3_df_title:
         q3_df = df[q3_title]
-        print('Currently Extracting ' + q3_title +' from '+ q3_state)
+        if show_output_on_notebook:
+            print('Currently Extracting ' + q3_title +' from '+ q3_state)
         q3_temp_df = q3_df[q3_df['state'] == q3_state]
         if i == 0: 
             q3_combined_df[q3_state] = q3_temp_df
@@ -231,21 +246,23 @@ for states in q3_state_list:
     q3_combined_df[states]['state'] = states
 
 q3_combined_df = q3_combined_df
-print(q3_combined_df["Johor"])
+if show_output_on_notebook:
+    print(q3_combined_df["Johor"])
 
 
-# In[13]:
+# In[10]:
 
 
 top_corr_features = []
 Question3GraphType = ""
-if QuestionSB == "Question 3":
+if QuestionSB == "Question 3"  or show_output_on_notebook:
     Question3GraphType = st.selectbox("Graph Type", ["Heat Map","Bar Chart"], key="Question 3 Graph Type")
     st.title(Question3GraphType + " to show Strong Features/Indicators to Daily Cases")
 
 for corr_states in q3_state_list:
-    print('-'*60)
-    print('Currently Showing state: '+ corr_states)
+    if show_output_on_notebook:
+        print('-'*60)
+        print('Currently Showing state: '+ corr_states)
     q3_corr_df = q3_combined_df[corr_states]
 #     q3_corr_df = q3_corr_df.fillna(0)
     q3_corr_df = q3_corr_df.drop(columns=['state'])
@@ -265,7 +282,8 @@ for corr_states in q3_state_list:
         text.set_fontsize('x-large')
     plt.xticks( size='x-large')
     plt.yticks(rotation=0, size='x-large')
-    plt.show()
+    if show_output_on_notebook:
+        plt.show()
     if QuestionSB == "Question 3" and Question3GraphType == "Heat Map":
         st.header("Currently Showing state: " + corr_states)
         st.pyplot()
@@ -274,14 +292,13 @@ for corr_states in q3_state_list:
     strong_features_list = list(strong_features.index)
     for corr_feat in strong_features_list:
         top_corr_features.append(corr_feat)
-print(top_corr_features)
 
 
 # ### For the first method, we have decided to use pearson correlation to check what features has a stronger cause and effect relationship with the daily cases for each different state individually. We then select the commonly shared features that has a correlation of above 0.7 to justify that the feature selected is universally applied to each of these states. 
 # 
 # ### The commonlly shared features that has a correlation score higher than 0.7 is beds_icu_rep,  beds_icu_total, beds_icu_covid, icu_covid, vent_covid, vent_noncovid, admitted_covid, admitted_total, discharged_covid, discharged_total and hosp_covid. These features are the ones that will be the most helpful for training a prediction model based on pearsons correlation
 
-# In[ ]:
+# In[17]:
 
 
 # 2nd Method Regression Feature Selection
@@ -291,8 +308,9 @@ top_mutual_features = []
 threshold = 10
 
 for filter_states in q3_state_list:
-    print('-'*60)
-    print('Currently Showing state: '+ filter_states)
+    if show_output_on_notebook:
+        print('-'*60)
+        print('Currently Showing state: '+ filter_states)
     q3_filter_df = q3_combined_df[filter_states]
     y = q3_filter_df['cases_new']
     X = q3_filter_df.drop(columns=['state', 'cases_new', 'date'])
@@ -303,19 +321,22 @@ for filter_states in q3_state_list:
     feat_importances = pd.Series(feature_score, X.columns)
     plt.figure(figsize=(15, 7))
     feat_importances.plot(kind='bar')
-    plt.show()
+    if show_output_on_notebook:
+        plt.show()
     if QuestionSB == "Question 3" and Question3GraphType == "Bar Chart":
         st.header("Currently Showing state: " + filter_states)
         st.pyplot()
 
     # Display the top 10 most relevant features based on mutual info classification 
-    print('Top 10 most relevant')
+    if show_output_on_notebook:
+        print('Top 10 most relevant')
     if QuestionSB == "Question 3" and Question3GraphType == "Bar Chart":
         st.subheader('Top 10 most relevant')
     for score, f_name in sorted(zip(feature_score, X.columns), reverse=True)[:threshold]:
         if QuestionSB == "Question 3" and Question3GraphType == "Bar Chart":
-            st.markdown(f_name + ":" + str(score))
-        print(f_name, score) 
+            st.markdown(f_name + ":" + str(round(score, 2)))
+        if show_output_on_notebook:
+            print(f_name, round(score, 2)) 
         top_mutual_features.append(f_name)
 
 
@@ -332,33 +353,35 @@ for filter_states in q3_state_list:
 # 
 # ### Starting off, we will extract the features of columns that shows high universal correlation and dependencies in question 3 
 
-# In[15]:
+# In[12]:
 
 
-if QuestionSB == "Question 4":
+if QuestionSB == "Question 4"  or show_output_on_notebook:
     # Get the repeated features in mutual_info_class
     mutual_word_counts = collections.Counter(top_mutual_features)
     repeated_mutual_features = []
 
     for mutual_word, mutual_count in sorted(mutual_word_counts.items()):
-        print('"%s" is repeated %d time%s.' % (mutual_word, mutual_count, "s" if mutual_count > 1 else ""))
+        if show_output_on_notebook:
+            print('"%s" is repeated %d time%s.' % (mutual_word, mutual_count, "s" if mutual_count > 1 else ""))
         if mutual_count >= 3:
             repeated_mutual_features.append(mutual_word)
-
-    print('\nMutual_info_classification features:' ,repeated_mutual_features)
-    print('-'*100)
+    if show_output_on_notebook:
+        print('\nMutual_info_classification features:' ,repeated_mutual_features)
+        print('-'*100)
 
     # Get the repeated features in correlation table 
     repeated_corr_features = []
     corr_word_counts = collections.Counter(top_corr_features)
 
     for corr_word, corr_count in sorted(corr_word_counts.items()):
-        print('"%s" is repeated %d time%s.' % (corr_word, corr_count, "s" if corr_count > 1 else ""))
+        if show_output_on_notebook:
+            print('"%s" is repeated %d time%s.' % (corr_word, corr_count, "s" if corr_count > 1 else ""))
         if corr_count >= 3:
             repeated_corr_features.append(corr_word)
-
-    print("\nPearson's correlation features:" ,repeated_corr_features)
-    print('-'*100)
+    if show_output_on_notebook:
+        print("\nPearson's correlation features:" ,repeated_corr_features)
+        print('-'*100)
 
     # Extract the features for the chosen columns later in the model training phase 
     joined_features = repeated_corr_features + repeated_mutual_features
@@ -366,7 +389,8 @@ if QuestionSB == "Question 4":
     joined_word_counts = collections.Counter(joined_features)
 
     for joined_word, joined_count in sorted(joined_word_counts.items()):
-        print('"%s" is repeated %d time%s.' % (joined_word, joined_count, "s" if joined_count > 1 else ""))
+        if show_output_on_notebook:
+            print('"%s" is repeated %d time%s.' % (joined_word, joined_count, "s" if joined_count > 1 else ""))
         if joined_count == 2:
             repeated_joined_features.append(joined_word)
 
@@ -374,17 +398,17 @@ if QuestionSB == "Question 4":
 
     for repeated in repeated_joined_features:
         training_features.remove(repeated)
-
-    print('\nFeatures that will be used in model training: ',training_features)
-    print('\nTotal number of training features: ', len(training_features))
+    if show_output_on_notebook:
+        print('\nFeatures that will be used in model training: ',training_features)
+        print('\nTotal number of training features: ', len(training_features))
 
 
 # ### In this part of the code, we will extract the X(Training Features) and y(Labels) by state
 
-# In[16]:
+# In[13]:
 
 
-if QuestionSB == "Question 4":
+if QuestionSB == "Question 4"  or show_output_on_notebook:
     from sklearn.ensemble import RandomForestClassifier
     from sklearn.neighbors import KNeighborsClassifier
     from sklearn.ensemble import RandomForestRegressor
@@ -410,7 +434,7 @@ if QuestionSB == "Question 4":
 
 # ### Create a function that will plot the decision region
 
-# In[17]:
+# In[14]:
 
 
 def plot_decision_regions(X, y, classifier, test_idx=None, resolution=1):
@@ -439,7 +463,7 @@ def plot_decision_regions(X, y, classifier, test_idx=None, resolution=1):
 
 # ### After trying, we decide to leave the datasets as it is because it does not yield better results. 
 
-# In[116]:
+# In[22]:
 
 
 from sklearn.preprocessing import StandardScaler
@@ -448,8 +472,17 @@ from sklearn.metrics import mean_absolute_error
 from sklearn.metrics import r2_score
 from sklearn.model_selection import learning_curve
 
-if QuestionSB == "Question 4":
+if QuestionSB == "Question 4"  or show_output_on_notebook:
     st.title("Classification Model's MAE Score For 4 States")
+    if show_output_on_notebook:
+        print("rf_class = Random Forests Classifiers")
+        print("knn = K-nearest Neighbors Algorithm")
+        print("rf_reg = Random Forest Regression")
+        print("svr = Support Vector Regression")
+    st.markdown("rf_class = Random Forests Classifiers")
+    st.markdown("knn = K-nearest Neighbors Algorithm")
+    st.markdown("rf_reg = Random Forest Regression")
+    st.markdown("svr = Support Vector Regression")
     q4_state_list = ['Pahang', 'Kedah', 'Johor', 'Selangor']
     q4_combined_df = q3_combined_df
     stdsc = StandardScaler()
@@ -481,17 +514,18 @@ if QuestionSB == "Question 4":
 
         # Model Training 
         for classifiers in q4_classifier_names:
-            print('Currently Training '+classifiers+' model for ' + q4_states)
+            if show_output_on_notebook:
+                print('Currently Training '+classifiers+' model for ' + q4_states)
             q4_classifiers[classifiers].fit(X_train, y_train)
-
             # Evaluation Metrtics 
             y_train_pred = q4_classifiers[classifiers].predict(X_train)
             y_test_pred = q4_classifiers[classifiers].predict(X_test)
             mae_score = mean_absolute_error(y_test, y_test_pred)
             mae_score_round = round(mae_score, 3)
-            print('The MAE score for '+classifiers+' is ', mae_score_round)
+            if show_output_on_notebook:
+                print('The MAE score for '+classifiers+' is ', mae_score_round)
+                print('-'*100)
             mae_score_list.append(mae_score_round)
-            print('-'*100)
 
         # Plot the bar plot of the MAE scores of each model for comparison puposes
         fig = plt.figure()
@@ -499,9 +533,10 @@ if QuestionSB == "Question 4":
         ax.bar(q4_classifier_names, mae_score_list)
         ax.set_ylabel('MAE Score')
         st.header("Performance of each model in " + q4_states)
-        plt.show()
+        if show_output_on_notebook:
+            plt.show()
+            print('-'*100)
         st.pyplot()
-        print('-'*100)
         mae_score_list.clear()
 
 
