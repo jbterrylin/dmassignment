@@ -22,7 +22,8 @@ from itertools import compress
 st.set_option('deprecation.showPyplotGlobalUse', False)
 pd.options.mode.chained_assignment = None
 
-dir = 'Data Mining Assignment Dataset'
+dir = ''
+#Data Mining Assignment Dataset
 # if u want to show graph in this note pls change to true (this wll make streamlit having error if convert with True)
 show_output_on_notebook = False
 
@@ -42,7 +43,8 @@ QuestionSB = st.sidebar.selectbox("Questions", ["Question 1(Missing Value)", "Qu
 # In[3]:
 
 
-file_list = glob.glob(dir+"/*." +"csv")
+# file_list = glob.glob(dir+"/*." +"csv")
+file_list = glob.glob("*." +"csv")
 if show_output_on_notebook:
     print(file_list)
 
