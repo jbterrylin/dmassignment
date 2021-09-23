@@ -50,16 +50,13 @@ if show_output_on_notebook:
 
 df = {}
 for i, names in enumerate(file_list):
-    df[file_list[i]] = pd.read_csv(os.path.dirname(__file__)+"/"+dir+"/"+file_list[i])
-    print(os.path.dirname(__file__)+"/"+dir+"/"+file_list[i])
-    print(file_list[i])
+    df[file_list[i].replace(".csv",'')] = pd.read_csv(os.path.dirname(__file__)+"/"+dir+"/"+file_list[i])
+
+
+print(df['deaths_state'].head())
 if show_output_on_notebook:
     print(df['deaths_state'].head())
-
-# Get the array list for States in Malaysia
-state_list = list(np.unique(df['deaths_state']['state']))
-if show_output_on_notebook:
-    print(state_list)
+    print(list(np.unique(df['deaths_state']['state'])))
 
 
 # # Question (i) Answers
