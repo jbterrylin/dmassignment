@@ -43,12 +43,11 @@ QuestionSB = st.sidebar.selectbox("Questions", ["Question 1(Missing Value)", "Qu
 # In[3]:
 
 
-# file_list = glob.glob(dir+"/*." +"csv")
+file_list = glob.glob(dir+"/*." +"csv")
 from os import walk
 
-filenames = next(walk(mypath), (None, None, []))[2]  # [] if no file
+(_, _, filenames) = walk(os.path.dirname(__file__)).next()
 print(filenames)
-file_list = glob.glob("/"+dir+"/*." +"csv")
 if show_output_on_notebook:
     print(file_list)
 
