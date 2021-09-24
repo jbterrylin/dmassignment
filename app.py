@@ -44,16 +44,15 @@ QuestionSB = st.sidebar.selectbox("Questions", ["Question 1(Missing Value)", "Qu
 # In[3]:
 
 
-file_list = next(walk(os.path.dirname(__file__)+"/"+dir), (None, None, []))[2]
+file_list = next(walk(os.getcwd()+"/"+dir), (None, None, []))[2]
+
 if show_output_on_notebook:
     print(file_list)
 
 df = {}
 for i, names in enumerate(file_list):
-    df[file_list[i].replace(".csv",'')] = pd.read_csv(os.path.dirname(__file__)+"/"+dir+"/"+file_list[i])
+    df[file_list[i].replace(".csv",'')] = pd.read_csv(os.path.dirname(os.getcwd()+"/"+dir)+"/"+dir+"/"+file_list[i])
 
-
-print(df['deaths_state'].head())
 if show_output_on_notebook:
     print(df['deaths_state'].head())
     print(list(np.unique(df['deaths_state']['state'])))
